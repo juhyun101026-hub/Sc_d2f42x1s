@@ -1,0 +1,142 @@
+
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+            <meta charset="UTF-8">
+            <title>인터랙티브 만화 게임</title>
+            <style>
+                body { display: flex; flex-direction: column; align-items: center; background-color: #121212; color: #e0e0e0; font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; }
+                #comic-screen { max-width: 900px; width: 100%; cursor: pointer; border: 3px solid #333; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+                #comic-image { width: 100%; display: block; }
+                #ending-text { display: none; margin-top: 20px; font-size: 32px; font-weight: bold; color: #ffd700; text-shadow: 2px 2px 4px #000; }
+                #ending-comment { display: none; margin-top: 10px; font-size: 20px; color: #bbbbbb; max-width: 800px; text-align: center; }
+                /* 질문용 CSS 추가 */
+                #chapter-question { display: none; margin-top: 25px; font-size: 24px; font-weight: bold; color: #ffffff; text-align: center; }
+                #choices-box { display: none; margin-top: 25px; gap: 30px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 900px; }
+                .choice-btn { padding: 25px 50px; font-size: 26px; font-weight: bold; cursor: pointer; border-radius: 15px; border: 3px solid #4a90e2; background-color: #1f1f1f; color: white; transition: 0.3s; flex: 1; min-width: 300px; max-width: 400px; word-break: keep-all; }
+                .choice-btn:hover { background-color: #4a90e2; transform: scale(1.05); }
+                .restart-btn { border-color: #e74c3c; }
+                .restart-btn:hover { background-color: #e74c3c; }
+                #info-text { margin-bottom: 15px; color: #888; font-size: 0.9em; text-align: center; line-height: 1.5; }
+            </style>
+        </head>
+        <body>
+            <div id="info-text">화면의 <b>오른쪽</b>을 클릭하면 다음 페이지, <b>왼쪽</b>을 클릭하면 이전 페이지로 넘어갑니다.</div>
+            
+            <div id="comic-screen" onclick="handleImageClick(event)">
+                <img id="comic-image" src="" alt="만화 페이지">
+            </div>
+            
+            <div id="ending-text"></div>
+            <div id="ending-comment"></div>
+            
+            <div id="chapter-question"></div>
+            <div id="choices-box"></div>
+
+            <script>
+                const story = {"chapter_1": {"folder": "c1", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/c1", "pages": ["SMC5_2.png", "SMC5_3.png", "SMC5_4.png", "SMC5_5.png", "SMC5_6.png", "SMC5_7.png", "SMC5_8.png", "SMC5_9.png", "SMC5_10.png", "SMC5_11.png", "SMC5_12.png", "SMC5_13.png", "SMC5_14.png", "SMC5_15.png", "SMC5_16.png", "SMC5_17.png", "SMC5_18.png", "SMC5_19.png", "SMC5_20.png"], "choices": [{"text": "술게임을 하자고 한다", "next": "chapter_2"}, {"text": "안 하고 집에 간다", "next": "ending_1"}], "question": "갑자기 분위기를 타며 술게임이 하고픈 서민", "comment": ""}, "chapter_2": {"folder": "c2", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/c2", "pages": ["SC6_3.png", "SC6_4.png", "SC6_5.png", "SC6_6.png", "SC6_7.png", "SC6_8.png", "SC6_9.png", "SC6_10.png", "SC6_11.png", "SC6_12.png", "SC6_13.png", "SC6_14.png", "SC6_15.png", "SC6_16.png", "SC6_17.png"], "choices": [{"text": "떠오른 멘트를 날린다", "next": "ending_2"}, {"text": "이제 슬 집에 간다.", "next": "ending_3"}], "question": "갑자기 머리속에 무언가 떠오른 서민", "comment": ""}, "ending_1": {"folder": "e1", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/e1", "pages": ["SC6_21.png"], "choices": [], "question": "", "comment": "그냥 집에 가버린 서민은 아싸가 되서 평생 혼자 살았답니다."}, "ending_2": {"folder": "e2", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/e2", "pages": ["SC6_18.png", "SC6_19.png", "SC6_20.png", "SC6_21.png"], "choices": [], "question": "", "comment": "떠오른 멘트를 날려버린 서민은 더 이상 대학교에서 볼 수 없었습니다."}, "ending_3": {"folder": "e3", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/e3", "pages": ["S2_1_3.png", "S2_1_4.png", "S2_1_5.png", "S2_1_6.png", "S2_1_7.png", "S2_1_8.png", "S2_1_9.png", "S2_1_10.png", "S2_1_11.png", "S2_1_12.png", "S2_1_13.png", "S2_1_14.png", "S2_1_15.png"], "choices": [], "question": "", "comment": "철창 신세를 지게된 서민 과연 다음 이야기는 서민 게임 [데모판 진엔딩]"}};
+                const totalEndingsNum = 3; 
+                let currentChapter = "chapter_1"; 
+                let pageIndex = 0; 
+
+                function renderScreen() {
+                    const data = story[currentChapter];
+                    const imgElement = document.getElementById("comic-image");
+                    const choicesBox = document.getElementById("choices-box");
+                    const endingTextBox = document.getElementById("ending-text");
+                    const endingCommentBox = document.getElementById("ending-comment");
+                    const questionBox = document.getElementById("chapter-question");
+
+                    imgElement.src = data.folder + "/" + data.pages[pageIndex];
+
+                    if (currentChapter.startsWith("ending_") && pageIndex === data.pages.length - 1) {
+                        const endingNum = currentChapter.split("_")[1];
+                        endingTextBox.style.display = "block";
+                        endingTextBox.innerText = "엔딩 " + endingNum + " / " + totalEndingsNum;
+                        
+                        endingCommentBox.style.display = "block";
+                        endingCommentBox.innerText = data.comment || "";
+                    } else {
+                        endingTextBox.style.display = "none";
+                        endingCommentBox.style.display = "none";
+                    }
+
+                    if (pageIndex === data.pages.length - 1) {
+                        if (data.choices.length > 0) {
+                            // 질문 표시
+                            questionBox.style.display = "block";
+                            questionBox.innerText = data.question || "";
+                            
+                            choicesBox.style.display = "flex";
+                            choicesBox.innerHTML = ""; 
+                            data.choices.forEach(choice => {
+                                const btn = document.createElement("button");
+                                btn.className = "choice-btn";
+                                btn.innerText = choice.text;
+                                btn.onclick = (e) => { e.stopPropagation(); makeChoice(choice.next); };
+                                choicesBox.appendChild(btn);
+                            });
+                        } else if (currentChapter.startsWith("ending_")) {
+                            questionBox.style.display = "none";
+                            
+                            choicesBox.style.display = "flex";
+                            choicesBox.innerHTML = ""; 
+                            const btn = document.createElement("button");
+                            btn.className = "choice-btn restart-btn";
+                            btn.innerText = "처음부터 다시";
+                            btn.onclick = (e) => { 
+                                e.stopPropagation(); 
+                                currentChapter = "chapter_1"; 
+                                pageIndex = 0; 
+                                renderScreen(); 
+                                window.scrollTo(0, 0);
+                            };
+                            choicesBox.appendChild(btn);
+                        } else {
+                            questionBox.style.display = "none";
+                            choicesBox.style.display = "none";
+                        }
+                    } else {
+                        questionBox.style.display = "none";
+                        choicesBox.style.display = "none";
+                    }
+                }
+
+                function handleImageClick(event) {
+                    const screenWidth = document.getElementById("comic-screen").clientWidth;
+                    const clickX = event.offsetX;
+                    if (clickX < screenWidth / 3) {
+                        prevPage();
+                    } else {
+                        nextPage();
+                    }
+                }
+
+                function nextPage() {
+                    const data = story[currentChapter];
+                    if (pageIndex < data.pages.length - 1) {
+                        pageIndex++;
+                        renderScreen();
+                    }
+                }
+
+                function prevPage() {
+                    if (pageIndex > 0) {
+                        pageIndex--;
+                        renderScreen();
+                    }
+                }
+
+                function makeChoice(nextId) {
+                    if (!story[nextId]) { alert("연결된 스토리가 없어."); return; }
+                    currentChapter = nextId;
+                    pageIndex = 0; 
+                    renderScreen();
+                    window.scrollTo(0, 0);
+                }
+
+                window.onload = renderScreen;
+            </script>
+        </body>
+        </html>
+        
