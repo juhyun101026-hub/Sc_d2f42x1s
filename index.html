@@ -1,5 +1,4 @@
-
-        <!DOCTYPE html>
+<!DOCTYPE html>
         <html lang="ko">
         <head>
             <meta charset="UTF-8">
@@ -34,17 +33,21 @@
             <div id="choices-box"></div>
 
             <script>
+                // --- 여기에 비밀번호 코드를 추가했습니다 ---
+                const password = prompt("비밀번호를 입력하세요:");
+                if (password !== "0523") { 
+                    // 비밀번호가 틀리면 화면을 지우고 안내 문구를 띄운 뒤 스크립트를 정지합니다.
+                    document.body.innerHTML = "<h1 style='text-align:center; margin-top:20%; color:#e0e0e0;'>접근 권한이 없습니다.</h1>";
+                    throw new Error("접근 차단"); 
+                }
+                // ------------------------------------------
+
                 const story = {"chapter_1": {"folder": "c1", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/c1", "pages": ["SMC5_2.png", "SMC5_3.png", "SMC5_4.png", "SMC5_5.png", "SMC5_6.png", "SMC5_7.png", "SMC5_8.png", "SMC5_9.png", "SMC5_10.png", "SMC5_11.png", "SMC5_12.png", "SMC5_13.png", "SMC5_14.png", "SMC5_15.png", "SMC5_16.png", "SMC5_17.png", "SMC5_18.png", "SMC5_19.png", "SMC5_20.png"], "choices": [{"text": "술게임을 하자고 한다", "next": "chapter_2"}, {"text": "안 하고 집에 간다", "next": "ending_1"}], "question": "갑자기 분위기를 타며 술게임이 하고픈 서민", "comment": ""}, "chapter_2": {"folder": "c2", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/c2", "pages": ["SC6_3.png", "SC6_4.png", "SC6_5.png", "SC6_6.png", "SC6_7.png", "SC6_8.png", "SC6_9.png", "SC6_10.png", "SC6_11.png", "SC6_12.png", "SC6_13.png", "SC6_14.png", "SC6_15.png", "SC6_16.png", "SC6_17.png"], "choices": [{"text": "떠오른 멘트를 날린다", "next": "ending_2"}, {"text": "이제 슬 집에 간다.", "next": "ending_3"}], "question": "갑자기 머리속에 무언가 떠오른 서민", "comment": ""}, "ending_1": {"folder": "e1", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/e1", "pages": ["SC6_21.png"], "choices": [], "question": "", "comment": "그냥 집에 가버린 서민은 아싸가 되서 평생 혼자 살았답니다."}, "ending_2": {"folder": "e2", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/e2", "pages": ["SC6_18.png", "SC6_19.png", "SC6_20.png", "SC6_21.png"], "choices": [], "question": "", "comment": "떠오른 멘트를 날려버린 서민은 더 이상 대학교에서 볼 수 없었습니다."}, "ending_3": {"folder": "e3", "abs_path": "C:/Users/juhyu/Desktop/예시 게임/e3", "pages": ["S2_1_3.png", "S2_1_4.png", "S2_1_5.png", "S2_1_6.png", "S2_1_7.png", "S2_1_8.png", "S2_1_9.png", "S2_1_10.png", "S2_1_11.png", "S2_1_12.png", "S2_1_13.png", "S2_1_14.png", "S2_1_15.png"], "choices": [], "question": "", "comment": "철창 신세를 지게된 서민 과연 다음 이야기는 서민 게임 [데모판 진엔딩]"}};
                 const totalEndingsNum = 3; 
                 let currentChapter = "chapter_1"; 
                 let pageIndex = 0; 
 
                 function renderScreen() {
-                    const password = prompt("비밀번호를 입력하세요:");
-                    if (password !== "0523") { // 1234 대신 원하는 비밀번호를 적어
-                        document.body.innerHTML = "<h1 style='text-align:center; margin-top:20%;'>접근 권한이 없습니다.</h1>";
-                        throw new Error("접근 차단"); // 여기서 게임 실행을 멈춤
-                    }
                     const data = story[currentChapter];
                     const imgElement = document.getElementById("comic-image");
                     const choicesBox = document.getElementById("choices-box");
@@ -126,22 +129,3 @@
                 }
 
                 function prevPage() {
-                    if (pageIndex > 0) {
-                        pageIndex--;
-                        renderScreen();
-                    }
-                }
-
-                function makeChoice(nextId) {
-                    if (!story[nextId]) { alert("연결된 스토리가 없어."); return; }
-                    currentChapter = nextId;
-                    pageIndex = 0; 
-                    renderScreen();
-                    window.scrollTo(0, 0);
-                }
-
-                window.onload = renderScreen;
-            </script>
-        </body>
-        </html>
-        
