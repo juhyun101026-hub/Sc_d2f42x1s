@@ -129,3 +129,21 @@
                 }
 
                 function prevPage() {
+                    if (pageIndex > 0) {
+                        pageIndex--;
+                        renderScreen();
+                    }
+                }
+
+                function makeChoice(nextId) {
+                    if (!story[nextId]) { alert("연결된 스토리가 없어."); return; }
+                    currentChapter = nextId;
+                    pageIndex = 0; 
+                    renderScreen();
+                    window.scrollTo(0, 0);
+                }
+
+                window.onload = renderScreen;
+            </script>
+        </body>
+        </html>
